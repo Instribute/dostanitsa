@@ -70,11 +70,11 @@
     .btn-primary:active { background: var(--accent-hover); transform: scale(0.99); }
 
     /* Экран: Магазины */
-    .search-input { width: 100%; height: 44px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0 14px; color: var(--text); font-size: 14px; margin-bottom: 16px; outline: none; }
+    .search-input { width: 80%; height: 44px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0 14px; color: var(--text); font-size: 14px; margin-bottom: 16px; outline: none; }
     .store-card {
  	 background: var(--surface);
- 	 border: 1px solid var(--border);
- 	 border-radius: 24px; /* Увеличенное скругление */
+ 	 border: 2px solid var(--border);
+ 	 border-radius: 30px; /* Увеличенное скругление */
  	 overflow: hidden; /* Чтобы картинка аккуратно обрезалась по углам */
  	 margin-bottom: 24px;
  	 display: flex;
@@ -117,6 +117,139 @@
     .tab-btn { background: none; border: none; color: var(--subtext); display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; cursor: pointer; }
     .tab-btn.active { color: var(--accent); font-weight: 600; }
     .tab-btn svg { width: 22px; height: 22px; fill: currentColor; }
+
+    /* Модальное окно второго уровня (Order Modal) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: none;
+  align-items: flex-end;
+}
+.modal-overlay.open {
+  display: flex;
+}
+.order-modal {
+  width: 100%;
+  max-width: 420px;
+  max-height: 88vh;
+  background: #18181A;
+  border: 1px solid var(--border);
+  border-radius: 28px 28px 0 0;
+  padding: 20px 20px 32px 20px;
+  overflow-y: auto;
+  margin: 0 auto;
+  box-sizing: border-box;
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.modal-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+.modal-close-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--subtext);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Элементы формы заказа */
+.form-group {
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.form-group label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--subtext);
+  margin-left: 2px;
+}
+.form-input, .form-select {
+  width: 100%;
+  height: 48px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0 14px;
+  color: var(--text);
+  font-size: 15px;
+  outline: none;
+  box-sizing: border-box;
+}
+.form-input:focus, .form-select:focus {
+  border-color: var(--accent);
+}
+
+/* Чекбоксы и переключатели */
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  color: var(--text);
+}
+.custom-checkbox {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.uploaded-filename {
+  color: var(--accent);
+  text-decoration: underline;
+  word-break: break-all;
+  font-size: 13px;
+}
+
+/* Строка из 3 полей габаритов (Ш × Д × В) */
+.dimensions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+.dimension-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dimension-field label {
+  font-size: 11px;
+  color: var(--subtext);
+  text-align: center;
+}
+.dimension-field input {
+  text-align: center;
+  padding: 0 4px;
+}
+
   </style>
 </head>
 <body>
@@ -126,10 +259,11 @@
   <div class="sidebar-overlay" id="overlay" onclick="toggleMenu()"></div>
   <aside class="sidebar" id="sidebar">
     <div style="font-size: 20px; font-weight: 700; color: var(--accent); margin-bottom: 20px; padding-left: 10px;">Достаница</div>
-    <div class="menu-item active" onclick="switchView('hero', 'Главная')">⚡ Заказать</div>
-    <div class="menu-item" onclick="switchView('stores', 'Магазины')">🏬 Доступные магазины</div>
-    <div class="menu-item" onclick="switchView('pricing', 'Тарифы')">📋 Ценообразование</div>
-    <div class="menu-item" onclick="switchView('feedback', 'Контакты')">📞 Связь и поддержка</div>
+    <div class="menu-item active" onclick="switchView('hero', 'Главная')">Заказать</div>
+    <div class="menu-item" onclick="switchView('stores', 'Магазины')">Доступные магазины</div>
+    <div class="menu-item" onclick="switchView('pricing', 'Тарифы')">Ценообразование</div>
+    <div class="menu-item" onclick="switchView('map', 'Карта')">Ценообразование</div>
+    <div class="menu-item" onclick="switchView('feedback', 'Контакты')">Связь и поддержка</div>
   </aside>
 
   <!-- Верхний бар -->
@@ -145,11 +279,10 @@
     <!-- 1. Главный экран -->
     <section id="view-hero" class="tab-view active">
       <div class="hero">
-        <img src="logo.jpg" alt = "dostanitsa" style="width: 110px; height: auto; border-radius: 20px; object-fit: contain;">
-        <h1 class="hero-title">Достаница</h1>
-        <p class="hero-subtitle">Товары из любых гипермаркетов Краснодара — прямо к вашей калитке.</p>
-        <button class="btn-primary" onclick="alert('Открывается диалог выбора магазина и списка покупок')">Сделать заказ</button>
-      </div>
+        <img src="logo.jpg" alt = "dostanitsa" style="width: 300px; height: auto; border-radius: 20px; object-fit: contain;">
+        <p class="hero-subtitle">Товары из магазинов Краснодара — прямо к вашей калитке.</p>
+        <button class="btn-primary" onclick="openOrderModal()">Сделать заказ</button>
+</div>
     </section>
 
     <!-- 2. Магазины -->
@@ -216,6 +349,8 @@
       <button class="btn-primary" style="margin-top: 16px;">Написать в поддержку</button>
     </section>
 
+
+    
   </main>
 
   <!-- Нижняя панель -->
@@ -223,10 +358,6 @@
     <button class="tab-btn active" onclick="switchView('hero', 'Достаница')">
       <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
       <span>Главная</span>
-    </button>
-    <button class="tab-btn" onclick="switchView('stores', 'Магазины')">
-      <svg viewBox="0 0 24 24"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/></svg>
-      <span>Магазины</span>
     </button>
     <button class="tab-btn" onclick="alert('Корзина пока пуста')">
       <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
@@ -237,9 +368,166 @@
       <span>О сервисе</span>
     </button>
   </nav>
+
+<!-- Меню второго уровня: Оформление заказа -->
+<div class="modal-overlay" id="orderModal" onclick="closeOrderModal(event)">
+  <div class="order-modal" onclick="event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h3>Оформление заказа</h3>
+      <button class="modal-close-btn" onclick="closeOrderModal()">✕</button>
+    </div>
+
+    <form id="orderForm" onsubmit="event.preventDefault();">
+      
+      <!-- Имя -->
+      <div class="form-group">
+        <label>Имя</label>
+        <input type="text" class="form-input" placeholder="Иван Иванов" required>
+      </div>
+
+      <!-- Блок: Номер и Код заказа (скрываются при штрихкоде) -->
+      <div id="orderManualDetails">
+        <div class="form-group">
+          <label>Номер заказа</label>
+          <input type="text" id="orderNumber" class="form-input" placeholder="Например: 123-456-789">
+        </div>
+        <div class="form-group">
+          <label>Код заказа / получения</label>
+          <input type="text" id="orderCode" class="form-input" placeholder="Например: 4920">
+        </div>
+      </div>
+
+      <!-- Чекбокс загрузки штрихкода -->
+      <div class="form-group" style="margin: 10px 0 16px 0;">
+        <label class="checkbox-row">
+          <input type="checkbox" id="barcodeCheckbox" class="custom-checkbox" onchange="handleBarcodeToggle(this)">
+          <span id="barcodeLabelText">штрихкод (загрузить скриншот)</span>
+        </label>
+        <!-- Скрытый инпут для выбора файла -->
+        <input type="file" id="barcodeFileInput" accept="image/*" style="display: none;" onchange="handleFileSelected(this)">
+      </div>
+
+      <!-- Последний день хранения (Календарь) -->
+      <div class="form-group">
+        <label>Последний день хранения</label>
+        <input type="date" class="form-input" required>
+      </div>
+
+      <!-- Габариты (Ш × Д × В в одну строку, двузначные поля) -->
+      <div class="form-group">
+        <label>Габариты (двузначные, см)</label>
+        <div class="dimensions-row">
+          <div class="dimension-field">
+            <label>Ширина, см</label>
+            <input type="text" inputmode="numeric" maxlength="2" class="form-input" placeholder="00" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+          </div>
+          <div class="dimension-field">
+            <label>Длина, см</label>
+            <input type="text" inputmode="numeric" maxlength="2" class="form-input" placeholder="00" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+          </div>
+          <div class="dimension-field">
+            <label>Высота, см</label>
+            <input type="text" inputmode="numeric" maxlength="2" class="form-input" placeholder="00" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+          </div>
+        </div>
+      </div>
+
+      <!-- Вес (двузначное число) -->
+      <div class="form-group">
+        <label>Вес, кг (если менее 1кг, оставьте 0)</label>
+        <input type="text" inputmode="numeric" maxlength="2" class="form-input" placeholder="00" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+      </div>
+
+      <!-- Название магазина -->
+      <div class="form-group">
+        <label>Название магазина</label>
+        <select class="form-select">
+          <option value="" disabled selected>Выберите магазин из списка</option>
+          <option value="leroy">Леруа Мерлен</option>
+          <option value="mega">ТЦ МЕГА / Ашан</option>
+          <option value="bau">Бауцентр</option>
+          <option value="metro">METRO Cash & Carry</option>
+          <option value="casto">СБС Мегамолл</option>
+          <option value="other">Другой магазин</option>
+        </select>
+      </div>
+
+      <!-- Адрес доставки + чекбокс сохранить -->
+      <div class="form-group">
+        <label>Адрес доставки (станица, хутор, улица, дом)</label>
+        <input type="text" class="form-input" placeholder="ст. Динская, ул. Ленина, 15">
+        <label class="checkbox-row" style="margin-top: 8px;">
+          <input type="checkbox" class="custom-checkbox">
+          <span style="font-size: 13px; color: var(--subtext);">сохранить адрес</span>
+        </label>
+      </div>
+
+      <!-- Кнопка Оплатить -->
+      <button type="button" class="btn-primary" style="margin-top: 20px;" onclick="alert('Переход к шлюзу оплаты заказа...')">Оплатить</button>
+
+    </form>
+  </div>
+</div>
+
+  
 </div>
 
 <script>
+
+
+// Открытие / закрытие модалки заказа
+function openOrderModal() {
+  document.getElementById('orderModal').classList.add('open');
+}
+
+function closeOrderModal(e) {
+  if (!e || e.target.id === 'orderModal' || e.target.classList.contains('modal-close-btn')) {
+    document.getElementById('orderModal').classList.remove('open');
+  }
+}
+
+// Логика чекбокса "штрихкод"
+function handleBarcodeToggle(cb) {
+  const manualBlock = document.getElementById('orderManualDetails');
+  const fileInput = document.getElementById('barcodeFileInput');
+  const labelText = document.getElementById('barcodeLabelText');
+
+  if (cb.checked) {
+    // Скрываем поля номера и кода
+    manualBlock.style.display = 'none';
+    // Открываем файловый менеджер смартфона для загрузки скриншота
+    fileInput.click();
+  } else {
+    // Возвращаем поля назад
+    manualBlock.style.display = 'block';
+    // Очищаем файл из памяти
+    fileInput.value = '';
+    // Возвращаем дефолтный текст надписи
+    labelText.innerHTML = 'штрихкод (загрузить скриншот)';
+  }
+}
+
+// Обработка загруженного файла
+function handleFileSelected(input) {
+  const labelText = document.getElementById('barcodeLabelText');
+  const checkbox = document.getElementById('barcodeCheckbox');
+
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const previewUrl = URL.createObjectURL(file);
+    
+    // Превращаем текст в кликабельное имя файла, открывающее скриншот
+    labelText.innerHTML = `<a href="${previewUrl}" target="_blank" class="uploaded-filename" onclick="event.stopPropagation()">${file.name}</a>`;
+  } else {
+    // Если пользователь отменил выбор файла в проводнике
+    checkbox.checked = false;
+    document.getElementById('orderManualDetails').style.display = 'block';
+    labelText.innerHTML = 'штрихкод (загрузить скриншот)';
+  }
+}
+
+  
   function toggleMenu() {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('overlay').classList.toggle('open');
